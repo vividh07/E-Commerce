@@ -88,7 +88,7 @@ const Home = () => {
 
       {/* Features Section  */}
 
-      <FeaturesSection />
+      <FeaturesSection /> 
     </div>
   );
 };

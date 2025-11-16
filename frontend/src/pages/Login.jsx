@@ -6,12 +6,18 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const handleSubmit = (e)=>{
+    e.preventDefault();
+    console.log("data", {email, password})
+  }
+
   return (
     <div className="flex">
       <div className="w-full md:w-1/2 flex flex-col justify-center items-center p-8 md:p-12">
         <form
           noValidate
           className="w-full max-w-md bg-white p-8 rounded-lg border shadow-sm"
+          onSubmit={handleSubmit}
         >
           <div className="flex justify-center mb-6">
             <h2 className="text-xl font-medium">Xspark</h2>
@@ -36,8 +42,8 @@ const Login = () => {
             placeholder="Enter your password"
             />
           </div>
-          <button type="submit"
-          className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition"
+          <button type="submit" 
+          className="w-full bg-black text-white p-2 rounded-lg font-semibold hover:bg-gray-800 transition cursor-pointer"
           >Sign In</button>
           <p className="mt-6 text-center text-sm">Don't have an account ?
             <Link className="text-red-500 underline" to="/register">

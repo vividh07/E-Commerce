@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const FilterSidebar = () => {
   const [priceRange, setPriceRange] = useState([0, 100]);
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     category: "",
@@ -77,8 +78,36 @@ const FilterSidebar = () => {
         else{
             newFilters[name] = newFilters[name].filters((item)=> item !== value)
         }
+    } else{
+      newFilters[name] = value
     }
+    setFilters(newFilters)
+    updateURLParams(newFilters)
 
+  }
+
+  const updateURLParams = (newFilters)=>{
+    const params = new URLSearchParams()
+
+    Object.keys(newFilters).forEach((key)=>{
+      if(Array.isArray(newFilters[key]) && newFilters[key].length > 0){
+        params.append(key , newFilters[key].join(","))
+      }
+      else if(newFilters[key]){
+        params.append(key , newFilters[key])
+      }
+    })
+    setSearchParams(params)
+    navigate(`?${params.toString()}`)
+  }
+
+
+  const handlePricechange = (e)=>{
+    const newPrice = e.target.value
+    setPriceRange([0, newPrice])
+    const newFilters = {...filters , minPrice:0, maxPrice:newPrice}
+    setFilters(filters)
+    updateURLParams(newFilters)
   }
 
 
@@ -98,6 +127,7 @@ const FilterSidebar = () => {
               type="radio"
               name="category"
               onChange={handleFilterChange}
+              checked={filters.category === category}
               className="mr-2 h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300"
             />
             <span className="text-gray-700">{category}</span>
@@ -115,6 +145,7 @@ const FilterSidebar = () => {
               type="radio"
               name="gender"
               value={gender}
+              checked={filters.gender === gender}
               onChange={handleFilterChange}
               className="mr-2 h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300"
             />
@@ -133,8 +164,8 @@ const FilterSidebar = () => {
               key={color}
               name="color"
               value={color}
-              onChange={handleFilterChange}
-              className="w-8 h-8 rounded-full border border-gray-300 cursor-pointer transition hover:scale-105"
+              onClick={handleFilterChange}
+              className={`w-8 h-8 rounded-full border border-gray-300 cursor-pointer transition hover:scale-105 ${filters.color === color ? "ring-2 ring-blue-500" : ""} `}
               style={{ backgroundColor: color.toLowerCase() }}
             ></button>
           ))}
@@ -150,6 +181,7 @@ const FilterSidebar = () => {
             <input
               type="checkbox"
               name="size"
+              checked={filters.size.includes(size)}
               value={size}
               onChange={handleFilterChange}
               className="mr-2 h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300"
@@ -170,6 +202,7 @@ const FilterSidebar = () => {
               type="checkbox"
               name="material"
               value={material}
+              checked={filters.material.includes(material)}
               onChange={handleFilterChange}
               className="mr-2 h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300"
             />
@@ -189,6 +222,7 @@ const FilterSidebar = () => {
               type="checkbox"
               name="brand"
               value={brand}
+              checked={filters.brand.includes(brand)}
               onChange={handleFilterChange}
               className="mr-2 h-4 w-4 text-blue-500 focus:ring-blue-400 border-gray-300"
             />
@@ -205,6 +239,8 @@ const FilterSidebar = () => {
         <input type="range" name="priceRange" 
         min={0}
         max={10000}
+        value={priceRange[1]}
+        onChange={handlePricechange}
         className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer"
         />
         <div className="flex justify-between text-gray-600 mt-2">

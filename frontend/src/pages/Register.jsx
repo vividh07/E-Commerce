@@ -33,7 +33,7 @@ const Register = () => {
             className="w-full p-2 border rounded"
             placeholder="Enter your Name"
             />
-          </div>
+          </div> 
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-2">Email</label>
             <input type="email"

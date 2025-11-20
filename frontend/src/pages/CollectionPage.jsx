@@ -28,8 +28,12 @@ const CollectionPage = () => {
 
     // Clean event listener
 
-    document.removeEventListener("mousedown", handleClickOutside);
-  });
+    return ()=>{
+
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+  },[]);
 
   useEffect(() => {
     setTimeout(() => {

@@ -28,6 +28,18 @@ const checkout = {
   },
 };
 
+
+const calculatedEstimatedDelivery =(createdAt)=>{
+  const orderDate = new Date(createdAt)
+  orderDate.setDate(orderDate.getDate() + 5)
+  return orderDate.toLocaleDateString()
+}
+
+
+
+
+
+
 const OrderConfirmationPage = () => {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white">
@@ -47,6 +59,18 @@ const OrderConfirmationPage = () => {
                 Order date: {new Date(checkout.createdAt).toLocaleDateString()}
               </p>
             </div>
+
+            {/* Estimated Delivery  */}
+
+            <div>
+              <p className="text-emerald-700 text-sm">
+                Estimated Delivery:{" "}
+                {calculatedEstimatedDelivery(checkout.createdAt)}
+
+              </p>
+            </div>
+
+
           </div>
         </div>
       )}

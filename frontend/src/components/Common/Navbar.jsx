@@ -56,10 +56,11 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center space-x-4">
+          <Link className="block bg-black px-2 rounded text-sm text-white" to="/admin">Admin</Link>
           <Link to="/profile" className="hover:text-black">
             <HiOutlineUser className="h-6 w-6 text-gray-700" />
           </Link>
-          <button className="relative hover:text-black">
+          <button className="relative hover:text-black cursor-pointer">
             <HiOutlineShoppingBag
               onClick={toggleCartDrawer}
               className="h-6 w-6 text-gray-700"
@@ -71,10 +72,10 @@ const Navbar = () => {
 
           {/* Search Component */}
 
-          <div className="overflow-hidden">
+          <div className=" overflow-hidden">
             <SearchBar />
           </div>
-          <button onClick={toggleNavDrawer} className="md:hidden">
+          <button onClick={toggleNavDrawer} className="md:hidden ">
             <HiBars3BottomRight />
           </button>
         </div>

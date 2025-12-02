@@ -1,33 +1,112 @@
-const express = require("express")
-const User = require("../models/User")
-const jwt = require("jsonwebtoken")
+const express = require("express");
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+const { protect } = require("../middleware/authMiddleware");
 
+const router = express.Router();
 
-const router = express.Router()
+router.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
 
+  try {
+    // Registratoin Logic
 
+    let user = await User.findOne({ email });
 
-router.post("/register", async (req, res)=>{
-    const {name, email , password} = req.body
+    if (user) return res.status(400).json({ message: "User already exists" });
 
-    try {
-       let user = await User.findOne({email})
+    user = new User({ name, email, password });
+    await user.save();
 
-       if(user) return res.status(400).json({message: "User already exists"})
+    // Create JWT Payload
 
-        user = new User({name , email, password})
-        await user.save()
+    const payload = { user: { id: user._id, role: user.role } };
+
+    // Sign and return the token along with user data
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "40h" },
+      (err, token) => {
+        if (err) throw err;
 
         res.status(201).json({
-          message:"User created sucessfully"
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+          token,
+        });
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Server Error");
+  }
+});
 
-        })
-    }
-    catch (error){
-        console.log(error)
-        res.status(500).send("Server Error")
-    }
+// Login API
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    let user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ message: "Invalid Credentials" });
+    const isMatch = await user.matchPassword(password);
+
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid Credentials" });
+
+
+    const payload = { user: { id: user._id, role: user.role } };
+
+    // Sign and return the token along with user data
+
+    jwt.sign(
+      payload,
+      process.env.JWT_SECRET,
+      { expiresIn: "40h" },
+      (err, token) => {
+        if (err) throw err;
+
+        res.status(201).json({
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+          token,
+        });
+      }
+    );
+
+
+
+  } catch (error) {
+    console.error(error)
+    res.status(500).send("Server Error")
+  }
+});
+
+
+
+// Profile API
+
+router.get("/profile", protect , async (req, res)=>{
+    res.json(req.user)
 })
 
 
-module.exports = router
+
+
+
+
+
+
+module.exports = router;

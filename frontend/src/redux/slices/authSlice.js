@@ -2,19 +2,16 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // Retrieve user info and token from localstorage
-
 const userFromStorage = localStorage.getItem("userInfo")
   ? JSON.parse(localStorage.getItem("userInfo"))
   : null;
 
 // check for an existing guest id
-
 const initialGuestId =
   localStorage.getItem("guestId") || `guest_${new Date().getTime()}`;
 localStorage.setItem("guestId", initialGuestId);
 
 // initial state
-
 const initialState = {
   user: userFromStorage,
   guestId: initialGuestId,
@@ -23,7 +20,6 @@ const initialState = {
 };
 
 // Async thunk for login user
-
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (userData, { rejectWithValue }) => {
@@ -36,16 +32,19 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem("userToken", response.data.token);
       return response.data.user;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      // prefer server-provided payload if available
+      return rejectWithValue(
+        error.response?.data ?? { message: error.message ?? "Login failed" }
+      );
     }
   }
 );
 
 // Async thunk for user registration
-
 export const registerUser = createAsyncThunk(
   "auth/registerUser",
   async (userData, { rejectWithValue }) => {
+   
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/users/register`,
@@ -53,15 +52,18 @@ export const registerUser = createAsyncThunk(
       );
       localStorage.setItem("userInfo", JSON.stringify(response.data.user));
       localStorage.setItem("userToken", response.data.token);
+      console.log(response)
       return response.data.user;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      console.log(error)
+      return rejectWithValue(
+        error.response?.data ?? { message: error.message ?? "Registration failed" }
+      );
     }
   }
 );
 
 // Slice
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
@@ -81,34 +83,40 @@ const authSlice = createSlice({
 
   extraReducers: (builder) => {
     builder
+      // login
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        // set the user on success (was mistakenly writing to error)
+        state.user = action.payload;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        // safe fallback for error message
+        state.error = action.payload?.message ?? action.error?.message ?? "Login failed";
       })
 
+      // register
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.user = action.payload;
+        state.error = null;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload.message;
+        state.error =
+          action.payload?.message ?? action.error?.message ?? "Registration failed";
       });
   },
 });
 
-
-export const {logout , generateNewGuestId} = authSlice.actions
-export default authSlice.reducer
+export const { logout, generateNewGuestId } = authSlice.actions;
+export default authSlice.reducer;

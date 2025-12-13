@@ -42,6 +42,7 @@ export const addToCart = createAsyncThunk(
     { productId, quantity, size, color, guestId, userId },
     { rejectWithValue }
   ) => {
+    // console.log("data", { productId, quantity, size, color, guestId, userId })
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BACKEND_URL}/api/cart`,
@@ -54,8 +55,10 @@ export const addToCart = createAsyncThunk(
           userId,
         }
       );
+      // console.log("res", response)
       return response.data;
     } catch (error) {
+      
       return rejectWithValue(error.response.data);
     }
   }
